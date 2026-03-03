@@ -20,6 +20,16 @@ spec:
     spec:
       restartPolicy: Never
       enableServiceLinks: false
+      # Co-locate with the drupal pod so RWO PVCs (attached to the drupal pod's
+      # node) can be mounted here without Multi-Attach errors.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                {{- include "drupal.release_selector_labels" . | nindent 16 }}
+                deployment: drupal
+            topologyKey: kubernetes.io/hostname
       initContainers:
       # Fix ownership of PVC-mounted data directories for www-data (uid/gid 82).
       # ReadWriteOnce block storage creates directories owned by root:root.
