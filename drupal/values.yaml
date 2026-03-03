@@ -46,6 +46,10 @@ webRoot: /app/web
 # Multiple pods make sense for high availability.
 replicas: 1
 
+# Deployment strategy: RollingUpdate or Recreate.
+# Use Recreate when volumes use ReadWriteOnce (e.g. block storage) to avoid Multi-Attach errors.
+deploymentStrategy: RollingUpdate
+
 # Enable autoscaling using HorizontalPodAutoscaler
 # see: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
 autoscaling:
