@@ -40,7 +40,7 @@ metadata:
 spec:
   storageClassName: {{ .Values.backup.storageClassName }}
   accessModes:
-    - ReadWriteMany
+    - {{ .Values.backup.accessMode | default "ReadWriteMany" }}
   resources:
     requests:
       storage: {{ .Values.backup.storage }}
