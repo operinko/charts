@@ -139,6 +139,9 @@ spec:
       # Shell sidecar container — shares all volume mounts with php-fpm for drush/CLI access.
       - name: shell
         image: {{ .Values.shell.image | quote }}
+        # Shell entrypoint configures SSH host keys and sshd — requires root.
+        securityContext:
+          runAsUser: 0
         env:
         {{- include "drupal.env" . | indent 8 }}
         {{- if .Values.shell.gitAuth.keyserver.enabled }}
