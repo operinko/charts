@@ -2,6 +2,10 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "deploymentStrategy": {
+      "type": "string",
+      "enum": ["RollingUpdate", "Recreate"]
+    },
     "clusterDomain": {
       "type": "string"
     },
