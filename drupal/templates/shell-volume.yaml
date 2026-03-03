@@ -42,7 +42,7 @@ metadata:
     csi-rclone/umask: "077"
 spec:
   accessModes:
-    - ReadWriteMany
+    - {{ .Values.shell.mount.accessMode | default "ReadWriteMany" }}
   storageClassName: {{ .Values.shell.mount.storageClassName }}
   resources:
     requests:
