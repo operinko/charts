@@ -20,10 +20,28 @@ spec:
     spec:
       restartPolicy: Never
       enableServiceLinks: false
-      # fsGroup 82 = www-data: ensures PVC-mounted directories are writable
-      # by www-data (uid=82) when running on ReadWriteOnce block storage.
-      securityContext:
-        fsGroup: 82
+      initContainers:
+      # Fix ownership of PVC-mounted data directories for www-data (uid/gid 82).
+      # ReadWriteOnce block storage creates directories owned by root:root.
+      - name: fix-volume-permissions
+        image: busybox:stable
+        command: ['sh', '-c']
+        args:
+          - |
+            {{- range $index, $mount := $.Values.mounts }}
+            {{- if eq $mount.enabled true }}
+            chown -R 82:82 {{ $mount.mountPath }} || true
+            {{- end }}
+            {{- end }}
+        volumeMounts:
+          {{- range $index, $mount := $.Values.mounts }}
+          {{- if eq $mount.enabled true }}
+          - name: drupal-{{ $index }}
+            mountPath: {{ $mount.mountPath }}
+          {{- end }}
+          {{- end }}
+        securityContext:
+          runAsUser: 0
       containers:
       - name: post-release
         {{- include "drupal.php-container" . | nindent 8 }}

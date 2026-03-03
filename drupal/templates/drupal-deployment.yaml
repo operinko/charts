@@ -37,11 +37,29 @@ spec:
         {{- end }}
     spec:
       enableServiceLinks: false
-      # fsGroup 82 = www-data: ensures PVC-mounted directories are group-writable
-      # by www-data without needing an initContainer to chown. Required for
-      # ReadWriteOnce (block) volumes which are initially owned by root.
-      securityContext:
-        fsGroup: 82
+      initContainers:
+      # Fix ownership of PVC-mounted data directories for www-data (uid/gid 82).
+      # ReadWriteOnce block storage creates directories owned by root:root.
+      # We chown only user-data mounts (not ssh-keys, which sshd requires 0600).
+      - name: fix-volume-permissions
+        image: busybox:stable
+        command: ['sh', '-c']
+        args:
+          - |
+            {{- range $index, $mount := $.Values.mounts }}
+            {{- if eq $mount.enabled true }}
+            chown -R 82:82 {{ $mount.mountPath }} || true
+            {{- end }}
+            {{- end }}
+        volumeMounts:
+          {{- range $index, $mount := $.Values.mounts }}
+          {{- if eq $mount.enabled true }}
+          - name: drupal-{{ $index }}
+            mountPath: {{ $mount.mountPath }}
+          {{- end }}
+          {{- end }}
+        securityContext:
+          runAsUser: 0
       containers:
       # php-fpm container.
       - name: php
