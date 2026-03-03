@@ -1,0 +1,236 @@
+apiVersion: v1
+entries:
+  cert-manager-legacy-crds:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2026-03-03T17:54:36.441331036Z"
+    description: A helper chart to install CRDs from an older version of the cert-manager
+      chart.
+    digest: 87251a34bf308d9c3e4b3f59b6d06501636766579d5bf9c77188eb44c2481343
+    name: cert-manager-legacy-crds
+    urls:
+    - https://github.com/operinko/charts/releases/download/cert-manager-legacy-crds-0.1.0/cert-manager-legacy-crds-0.1.0.tgz
+    version: 0.1.0
+  csi-rclone:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2026-03-03T17:54:36.576006085Z"
+    description: CSI plugin for rclone mount
+    digest: dc85fd355d14fa5c603a96f6ab9ec36cddec10d7b76aa25caa55e2c8d4147548
+    name: csi-rclone
+    urls:
+    - https://github.com/operinko/charts/releases/download/csi-rclone-1.1.0/csi-rclone-1.1.0.tgz
+    version: 1.1.0
+  drupal:
+  - apiVersion: v2
+    created: "2026-03-03T17:54:36.721322813Z"
+    dependencies:
+    - condition: mariadb.enabled,drupal.mariadb.enabled,global.mariadb.enabled
+      name: mariadb
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 7.5.x
+    - condition: pxc-db.enabled
+      name: pxc-db
+      repository: https://percona.github.io/percona-helm-charts/
+      version: 1.12.x
+    - condition: memcached.enabled
+      name: memcached
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 4.2.x
+    - condition: redis.enabled
+      name: redis
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 16.13.x
+    - condition: mailhog.enabled
+      name: mailhog
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 5.1.x
+    - condition: mailpit.enabled
+      name: mailpit
+      repository: https://jouve.github.io/charts/
+      version: 0.24.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: file://../elasticsearch
+      version: 8.5.x
+    - name: silta-release
+      repository: file://../silta-release
+      version: ^1.x
+    digest: abd43987f22664b6205a5ff8ec9cbe941e9da4bef1efab5ea7722d1b484426f9
+    name: drupal
+    urls:
+    - https://github.com/operinko/charts/releases/download/drupal-1.28.6/drupal-1.28.6.tgz
+    version: 1.28.6
+  elasticsearch:
+  - apiVersion: v1
+    appVersion: 8.5.1
+    created: "2026-03-03T17:54:36.860255774Z"
+    description: Official Elastic helm chart for Elasticsearch
+    digest: 64cbac9f79e48077c8ba21253bcb1dc4a37e26b341e7a274259b943c47ec1739
+    home: https://github.com/elastic/helm-charts
+    icon: https://helm.elastic.co/icons/elasticsearch.png
+    maintainers:
+    - email: helm-charts@elastic.co
+      name: Elastic
+    name: elasticsearch
+    sources:
+    - https://github.com/elastic/elasticsearch
+    urls:
+    - https://github.com/operinko/charts/releases/download/elasticsearch-8.5.1/elasticsearch-8.5.1.tgz
+    version: 8.5.1
+  frontend:
+  - apiVersion: v2
+    created: "2026-03-03T17:54:37.055190935Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 7.10.x
+    - condition: mailhog.enabled
+      name: mailhog
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 5.1.x
+    - condition: mailpit.enabled
+      name: mailpit
+      repository: https://jouve.github.io/charts/
+      version: 0.24.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: file://../elasticsearch
+      version: 8.5.x
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 16.0.x
+    - condition: mongodb.enabled
+      name: mongodb
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 14.12.x
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 13.2.x
+    - name: silta-release
+      repository: file://../silta-release
+      version: ^1.x
+    - condition: redis.enabled
+      name: redis
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 19.1.5
+    digest: 4dfc40d5f4de390ea352b79b92a72f1b67b9f402945b3f10037b13be638d8250
+    name: frontend
+    urls:
+    - https://github.com/operinko/charts/releases/download/frontend-1.25.4/frontend-1.25.4.tgz
+    version: 1.25.4
+  silta-cluster:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2026-03-03T17:54:37.213710936Z"
+    dependencies:
+    - condition: ingress-nginx.enabled
+      name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.13.x
+    - condition: traefik.enabled
+      name: traefik
+      repository: file://../legacy_traefik
+      version: 1.87.x
+    - alias: nginx-traefik
+      condition: nginx-traefik.enabled
+      name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.13.x
+    - condition: pxc-operator.enabled
+      name: pxc-operator
+      repository: https://percona.github.io/percona-helm-charts/
+      version: 1.12.x
+    - condition: minio.enabled
+      name: minio
+      repository: file://../forked/minio/minio-6.0.5
+      version: 6.0.x
+    - condition: csi-rclone.enabled
+      name: csi-rclone
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 1.0.x
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io/
+      version: 0.10.x
+    - condition: silta-proxy.enabled
+      name: silta-proxy
+      repository: file://../silta-proxy
+      version: ^1.x
+    - condition: instana-agent.enabled
+      name: instana-agent
+      repository: https://agents.instana.io/helm
+      version: 1.2.x
+    - condition: nfs-subdir-external-provisioner.enabled
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.x
+    - condition: docker-registry.enabled
+      name: docker-registry
+      repository: https://twuni.github.io/docker-registry.helm
+      version: 2.1.x
+    description: Setup a Silta Kubernetes cluster.
+    digest: a63abfa7694097cf76b4d17f65cae97881b039cfc824bd33d8610a50fab8bb65
+    kubeVersion: '>=1.20.0-0'
+    name: silta-cluster
+    urls:
+    - https://github.com/operinko/charts/releases/download/silta-cluster-1.15.0/silta-cluster-1.15.0.tgz
+    version: 1.15.0
+  silta-proxy:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2026-03-03T17:54:37.370550873Z"
+    description: An HTTP proxy to provide a static egress IP for Silta clusters.
+    digest: 57404236a903ec301635eae8ec850332375a971b2d6713b26e387d40cb0cbe98
+    name: silta-proxy
+    urls:
+    - https://github.com/operinko/charts/releases/download/silta-proxy-1.0.0/silta-proxy-1.0.0.tgz
+    version: 1.0.0
+  silta-release:
+  - apiVersion: v2
+    created: "2026-03-03T17:54:37.473256191Z"
+    description: A library chart to provide generic functionality for a silta Helm
+      release.
+    digest: a4533fcc26f0903dbb95b6efc01e05539938d8940c50f7a9a2e172c9c1dd7ac1
+    name: silta-release
+    urls:
+    - https://github.com/operinko/charts/releases/download/silta-release-1.0.1/silta-release-1.0.1.tgz
+    version: 1.0.1
+  simple:
+  - apiVersion: v2
+    created: "2026-03-03T17:54:37.600673191Z"
+    dependencies:
+    - name: silta-release
+      repository: file://../silta-release
+      version: ^1.x
+    digest: a619dc6b9ab87605c5dc60535369400534b7c0358915a16716f5ac7382eeab05
+    name: simple
+    urls:
+    - https://github.com/operinko/charts/releases/download/simple-1.11.1/simple-1.11.1.tgz
+    version: 1.11.1
+  traefik:
+  - apiVersion: v1
+    appVersion: 1.7.26
+    created: "2026-03-03T17:54:37.727131572Z"
+    deprecated: true
+    description: DEPRECATED - A Traefik based Kubernetes ingress controller with Let's
+      Encrypt support
+    digest: bde950a57429ab5836e4b1b9f3b49aac9c44eb8169a916e9dc2d6421ce2f07b9
+    home: https://traefik.io/
+    icon: https://docs.traefik.io/assets/img/traefik.logo.png
+    keywords:
+    - traefik
+    - ingress
+    - acme
+    - letsencrypt
+    name: traefik
+    sources:
+    - https://github.com/containous/traefik
+    - https://github.com/helm/charts/tree/master/stable/traefik
+    urls:
+    - https://github.com/operinko/charts/releases/download/traefik-1.87.7/traefik-1.87.7.tgz
+    version: 1.87.7
+generated: "2026-03-03T17:54:37.727155918Z"
