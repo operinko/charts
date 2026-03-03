@@ -13,10 +13,14 @@ spec:
       {{- include "drupal.release_selector_labels" . | nindent 6 }}
       deployment: drupal
   strategy:
+    {{- if eq (.Values.deploymentStrategy | default "RollingUpdate") "Recreate" }}
+    type: Recreate
+    {{- else }}
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 0%
       maxSurge: 50%
+    {{- end }}
   template:
     metadata:
       labels:
