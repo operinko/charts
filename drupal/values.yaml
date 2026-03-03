@@ -465,6 +465,7 @@ shell:
     storageClassName: silta-shared
     csiDriverName: csi-rclone
     storage: 1M
+    accessMode: ReadWriteOnce
 
   # Extend resources defined under php.resources.
   resources:
@@ -482,17 +483,19 @@ shell:
 mounts:
   public-files:
     enabled: true
-    storage: 1G
+    storage: 1Gi
     # Assumes that webRoot is set to the default value "/app/web".
     mountPath: /app/web/sites/default/files
     storageClassName: silta-shared
     csiDriverName: csi-rclone
+    accessMode: ReadWriteOnce
   private-files:
     enabled: false
-    storage: 1G
+    storage: 1Gi
     mountPath: /app/private
     storageClassName: silta-shared
     csiDriverName: csi-rclone
+    accessMode: ReadWriteOnce
 
 # Configure reference data that will be used when creating new environments.
 referenceData:
@@ -528,7 +531,7 @@ referenceData:
   # Files larger than this will not be included in reference data.
   maxFileSize: '5M'
 
-  storage: 1G
+  storage: 1Gi
   storageClassName: silta-shared
   csiDriverName: csi-rclone
 
@@ -640,10 +643,10 @@ mariadb:
     name: drupal
     user: drupal
   master:
-    persistence:
+     persistence:
       # Database storage disk space allocation
       # Request assistance from ops team after changing this on existing deployment.
-      size: 1G
+      size: 1Gi
     resources:
       requests:
         cpu: 25m
