@@ -37,6 +37,11 @@ spec:
         {{- end }}
     spec:
       enableServiceLinks: false
+      # fsGroup 82 = www-data: ensures PVC-mounted directories are group-writable
+      # by www-data without needing an initContainer to chown. Required for
+      # ReadWriteOnce (block) volumes which are initially owned by root.
+      securityContext:
+        fsGroup: 82
       containers:
       # php-fpm container.
       - name: php

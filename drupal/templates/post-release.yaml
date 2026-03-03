@@ -20,6 +20,10 @@ spec:
     spec:
       restartPolicy: Never
       enableServiceLinks: false
+      # fsGroup 82 = www-data: ensures PVC-mounted directories are writable
+      # by www-data (uid=82) when running on ReadWriteOnce block storage.
+      securityContext:
+        fsGroup: 82
       containers:
       - name: post-release
         {{- include "drupal.php-container" . | nindent 8 }}
