@@ -643,7 +643,7 @@ mariadb:
     name: drupal
     user: drupal
   master:
-     persistence:
+    persistence:
       # Database storage disk space allocation
       # Request assistance from ops team after changing this on existing deployment.
       size: 1Gi
