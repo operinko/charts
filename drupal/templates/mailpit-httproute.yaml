@@ -24,19 +24,4 @@ spec:
       backendRefs:
         - name: {{ .Release.Name }}-mailpit-http
           port: 80
----
-# TLS certificate for the Mailpit HTTPRoute hostname.
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: {{ .Release.Name }}-mailpit-tls
-  labels:
-    {{- include "drupal.release_labels" . | nindent 4 }}
-spec:
-  secretName: {{ .Release.Name }}-mailpit-tls
-  issuerRef:
-    name: {{ .Values.ssl.issuer }}
-    kind: ClusterIssuer
-  dnsNames:
-    - {{ $hostname | quote }}
 {{- end }}

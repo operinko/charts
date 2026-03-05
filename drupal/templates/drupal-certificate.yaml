@@ -1,6 +1,8 @@
 {{- $context_ingress := .Values.ingress.default }}
 {{- $context_ssl := .Values.ssl }}
 {{- if $context_ingress.tls }}
+{{- /* For traefik/Gateway API, certs are issued in the Gateway namespace via gateway-tls.yaml. */}}
+{{- if ne $context_ingress.type "traefik" }}
 {{- if has $context_ssl.issuer (list "letsencrypt" "letsencrypt-staging") }}
 apiVersion: {{ include "cert-manager.api-version" . | trim }}
 kind: Certificate
@@ -136,6 +138,7 @@ data:
 ---
 {{- end }}
 
+{{- end }}
 {{- end }}
 {{- end }}
 
