@@ -1,27 +1,67 @@
 {{- if .Values.mailpit.enabled }}
 {{- $hostname := printf "%s.%s" .Values.mailpit.httproute.prefix (include "drupal.domain" . | trim) }}
 ---
-# HTTPRoute for external access to the Mailpit web UI.
+# Ingress for external access to the Mailpit web UI.
 # Hostname: mail.<environmentName>.<projectName>.<clusterDomain>
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
+apiVersion: {{ include "ingress.api-version" . | trim }}
+kind: Ingress
 metadata:
   name: {{ .Release.Name }}-mailpit
+  annotations:
+    {{- if eq ( include "cert-manager.api-version" . | trim ) "cert-manager.io/v1" }}
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    {{- end }}
   labels:
     {{- include "drupal.release_labels" . | nindent 4 }}
 spec:
-  parentRefs:
-    - kind: Gateway
-      name: main
-      namespace: traefik
-  hostnames:
-    - {{ $hostname | quote }}
+  {{- if eq ( include "ingress.api-version" . | trim ) "networking.k8s.io/v1" }}
+  ingressClassName: {{ regexReplaceAll "[^[:alnum:]]" .Values.ingress.default.type "-" | quote }}
+  {{- end }}
+  {{- if .Values.ingress.default.tls }}
+  tls:
+    - secretName: {{ .Release.Name }}-mailpit-tls
+      hosts:
+        - {{ $hostname | quote }}
+  {{- end }}
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
-        - name: {{ .Release.Name }}-mailpit-http
-          port: 80
+    - host: {{ $hostname | quote }}
+      http:
+        paths:
+          - path: /
+            {{- if eq ( include "ingress.api-version" . | trim ) "networking.k8s.io/v1" }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- if eq ( include "ingress.api-version" . | trim ) "networking.k8s.io/v1" }}
+              service:
+                name: {{ .Release.Name }}-mailpit-http
+                port:
+                  number: 80
+              {{- else }}
+              serviceName: {{ .Release.Name }}-mailpit-http
+              servicePort: 80
+              {{- end }}
+---
+{{- if .Values.ingress.default.tls }}
+{{- if has .Values.ssl.issuer (list "letsencrypt" "letsencrypt-staging") }}
+# TLS certificate for the Mailpit Ingress hostname.
+apiVersion: {{ include "cert-manager.api-version" . | trim }}
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-mailpit-crt
+  annotations:
+    cert-manager.io/issue-temporary-certificate: "true"
+  labels:
+    {{- include "drupal.release_labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Release.Name }}-mailpit-tls
+  dnsNames:
+    - {{ $hostname | quote }}
+  issuerRef:
+    name: {{ .Values.ssl.issuer }}
+    kind: ClusterIssuer
+  privateKey:
+    rotationPolicy: "Always"
+{{- end }}
+{{- end }}
 {{- end }}

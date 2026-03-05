@@ -1,8 +1,6 @@
 {{- $context_ingress := .Values.ingress.default }}
 {{- $context_ssl := .Values.ssl }}
 {{- if $context_ingress.tls }}
-{{- /* For traefik/Gateway API, certs are issued in the Gateway namespace via gateway-tls.yaml. */}}
-{{- if ne $context_ingress.type "traefik" }}
 {{- if has $context_ssl.issuer (list "letsencrypt" "letsencrypt-staging") }}
 apiVersion: {{ include "cert-manager.api-version" . | trim }}
 kind: Certificate
@@ -10,9 +8,7 @@ metadata:
   name: {{ .Release.Name }}-crt
   annotations:
     cert-manager.io/issue-temporary-certificate: "true"
-    {{- if ne $context_ingress.type "traefik" }}
     acme.cert-manager.io/http01-override-ingress-name: "{{ $.Release.Name }}-drupal"
-    {{- end }}
   labels:
     {{- include "drupal.release_labels" . | nindent 4 }}
 spec:
@@ -41,9 +37,7 @@ metadata:
   name: {{ $.Release.Name }}-crt-p{{ $index }}
   annotations:
     cert-manager.io/issue-temporary-certificate: "true"
-    {{- if ne $context_ingress.type "traefik" }}
     acme.cert-manager.io/http01-override-ingress-name: "{{ $.Release.Name }}-drupal"
-    {{- end }}
   labels:
     {{- include "drupal.release_labels" $ | nindent 4 }}
 spec:
@@ -154,9 +148,7 @@ metadata:
   name: {{ $.Release.Name }}-crt-{{ $index }}
   annotations:
     cert-manager.io/issue-temporary-certificate: "true"
-    {{- if ne $context_ingress.type "traefik" }}
     acme.cert-manager.io/http01-override-ingress-name: "{{ $.Release.Name }}-drupal-{{ $domain.ingress }}"
-    {{- end }}
   labels:
     {{- include "drupal.release_labels" $ | nindent 4 }}
 spec:
