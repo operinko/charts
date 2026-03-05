@@ -4,7 +4,10 @@
   "properties": {
     "deploymentStrategy": {
       "type": "string",
-      "enum": ["RollingUpdate", "Recreate"]
+      "enum": [
+        "RollingUpdate",
+        "Recreate"
+      ]
     },
     "clusterDomain": {
       "type": "string"
@@ -1449,6 +1452,18 @@
             "default",
             "json"
           ]
+        }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
         }
       }
     }

@@ -118,6 +118,12 @@ ingress:
     # extraAnnotations:
     #   networking.gke.io/suppress-firewall-xpn-error: "true"
 
+# Gateway API settings (used when ingress.default.type is "traefik").
+# Configures the parentRef Gateway for HTTPRoute resources.
+gateway:
+  name: main
+  namespace: traefik
+
 # Infrastructure related settings.
 cluster:
   type: gke
