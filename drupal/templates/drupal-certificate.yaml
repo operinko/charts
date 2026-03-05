@@ -134,7 +134,6 @@ data:
 
 {{- end }}
 {{- end }}
-{{- end }}
 
 # Certificates for exposeDomains
 {{- range $index, $domain := .Values.exposeDomains }}
