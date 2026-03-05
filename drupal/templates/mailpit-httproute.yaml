@@ -1,0 +1,42 @@
+{{- if .Values.mailpit.enabled }}
+{{- $hostname := printf "%s.%s" .Values.mailpit.httproute.prefix (include "drupal.domain" . | trim) }}
+---
+# HTTPRoute for external access to the Mailpit web UI.
+# Hostname: mail.<environmentName>.<projectName>.<clusterDomain>
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ .Release.Name }}-mailpit
+  labels:
+    {{- include "drupal.release_labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: main
+      namespace: traefik
+  hostnames:
+    - {{ $hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ .Release.Name }}-mailpit-http
+          port: 80
+---
+# TLS certificate for the Mailpit HTTPRoute hostname.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}-mailpit-tls
+  labels:
+    {{- include "drupal.release_labels" . | nindent 4 }}
+spec:
+  secretName: {{ .Release.Name }}-mailpit-tls
+  issuerRef:
+    name: {{ .Values.ssl.issuer }}
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ $hostname | quote }}
+{{- end }}
