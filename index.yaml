@@ -23,6 +23,45 @@ entries:
     version: 1.1.0
   drupal:
   - apiVersion: v2
+    created: "2026-03-05T13:59:08.994085624Z"
+    dependencies:
+    - condition: mariadb.enabled,drupal.mariadb.enabled,global.mariadb.enabled
+      name: mariadb
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 7.5.x
+    - condition: pxc-db.enabled
+      name: pxc-db
+      repository: https://percona.github.io/percona-helm-charts/
+      version: 1.12.x
+    - condition: memcached.enabled
+      name: memcached
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 4.2.x
+    - condition: redis.enabled
+      name: redis
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 16.13.x
+    - condition: mailhog.enabled
+      name: mailhog
+      repository: https://storage.googleapis.com/charts.wdr.io
+      version: 5.1.x
+    - condition: mailpit.enabled
+      name: mailpit
+      repository: https://jouve.github.io/charts/
+      version: 0.24.x
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: file://../elasticsearch
+      version: 8.5.x
+    - name: silta-release
+      repository: file://../silta-release
+      version: ^1.x
+    digest: 5d458b0c1164d169e9b73556fd35f5e71d4743169d59c5ce8e50c0bcb0a3cd11
+    name: drupal
+    urls:
+    - https://github.com/operinko/charts/releases/download/drupal-1.28.14/drupal-1.28.14.tgz
+    version: 1.28.14
+  - apiVersion: v2
     created: "2026-03-03T20:23:58.831125327Z"
     dependencies:
     - condition: mariadb.enabled,drupal.mariadb.enabled,global.mariadb.enabled
@@ -506,4 +545,4 @@ entries:
     urls:
     - https://github.com/operinko/charts/releases/download/traefik-1.87.7/traefik-1.87.7.tgz
     version: 1.87.7
-generated: "2026-03-03T20:23:58.831149421Z"
+generated: "2026-03-05T13:59:08.994125448Z"
