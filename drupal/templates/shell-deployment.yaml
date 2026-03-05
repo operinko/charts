@@ -1,1 +1,131 @@
-{{- /* Shell is now a sidecar in the drupal deployment. See drupal-deployment.yaml. */ -}}
+{{- if .Values.shell.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-shell
+  labels:
+    {{- include "drupal.release_labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  # Shell provides SSH access; only one replica needed.
+  selector:
+    matchLabels:
+      {{- include "drupal.release_selector_labels" . | nindent 6 }}
+      service: shell
+  template:
+    metadata:
+      labels:
+        {{- include "drupal.release_labels" . | nindent 8 }}
+        service: shell
+      annotations:
+        # Recreate pods when configMaps or secrets change.
+        configMap-checksum: {{ include (print $.Template.BasePath "/drupal-configmap.yaml") . | sha256sum }}
+        shell-cm-checksum: {{ include (print $.Template.BasePath "/shell-configmap.yaml") . | sha256sum }}
+        shell-sec-checksum: {{ include (print $.Template.BasePath "/shell-secret.yaml") . | sha256sum }}
+    spec:
+      enableServiceLinks: false
+      initContainers:
+      # Fix ownership of PVC-mounted data directories for www-data (uid/gid 82).
+      - name: fix-volume-permissions
+        image: busybox:stable
+        command: ['sh', '-c']
+        args:
+          - |
+            {{- range $index, $mount := $.Values.mounts }}
+            {{- if eq $mount.enabled true }}
+            chown -R 82:82 {{ $mount.mountPath }} || true
+            {{- end }}
+            {{- end }}
+        volumeMounts:
+          {{- range $index, $mount := $.Values.mounts }}
+          {{- if eq $mount.enabled true }}
+          - name: drupal-{{ $index }}
+            mountPath: {{ $mount.mountPath }}
+          {{- end }}
+          {{- end }}
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: shell
+        image: {{ .Values.shell.image | quote }}
+        # Shell entrypoint configures SSH host keys and sshd — requires root.
+        securityContext:
+          runAsUser: 0
+        env:
+        {{- include "drupal.env" . | indent 8 }}
+        {{- if .Values.shell.gitAuth.keyserver.enabled }}
+        - name: GITAUTH_URL
+          value: {{ .Values.shell.gitAuth.keyserver.url | default (printf "https://keys.%s/api/1/git-ssh-keys" .Values.clusterDomain) | quote }}
+        - name: GITAUTH_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secrets-shell
+              key: keyserver.username
+        - name: GITAUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secrets-shell
+              key: keyserver.password
+        - name: GITAUTH_SCOPE
+          value: {{ .Values.shell.gitAuth.repositoryUrl }}
+        - name: OUTSIDE_COLLABORATORS
+          value: {{ .Values.shell.gitAuth.outsideCollaborators | default true | quote }}
+        {{- end }}
+        ports:
+          - containerPort: 22
+            name: ssh
+        volumeMounts:
+        {{- include "drupal.volumeMounts" . | nindent 8 }}
+        - name: ssh-keys
+          mountPath: /etc/ssh/keys
+        - name: shell-configmap
+          mountPath: /etc/ssh/authorized_keys
+          subPath: authorizedKeys
+          readOnly: true
+        {{- if .Values.backup.enabled }}
+        - name: {{ .Release.Name }}-backup
+          mountPath: /backups
+          readOnly: true
+        {{- end }}
+        {{- if or $.Values.shell.resources .Values.php.resources }}
+        resources:
+          {{- merge .Values.shell.resources .Values.php.resources | toYaml | nindent 10 }}
+        {{- end }}
+      volumes:
+        {{- include "drupal.volumes" . | nindent 8 }}
+        - name: ssh-keys
+          persistentVolumeClaim:
+            {{- if and ( eq $.Values.shell.mount.storageClassName "silta-shared" ) ( eq ( include "silta-cluster.rclone.has-provisioner" $ ) "true" ) }}
+            claimName: {{ .Release.Name }}-ssh-keys2
+            {{- else }}
+            claimName: {{ .Release.Name }}-ssh-keys
+            {{- end }}
+        - name: shell-configmap
+          configMap:
+            name: {{ .Release.Name }}-shell
+        {{- if .Values.backup.enabled }}
+        - name: {{ .Release.Name }}-backup
+          persistentVolumeClaim:
+            {{- if and ( eq $.Values.backup.storageClassName "silta-shared" ) ( eq ( include "silta-cluster.rclone.has-provisioner" $ ) "true" ) }}
+            claimName: {{ .Release.Name }}-backup2
+            {{- else }}
+            claimName: {{ .Release.Name }}-backup
+            {{- end }}
+        {{- end }}
+      serviceAccountName: {{ include "drupal.serviceAccountName" . }}
+      {{- if .Values.shell.nodeSelector }}
+      nodeSelector:
+        {{- .Values.shell.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.shell.tolerations (include "drupal.tolerations" .Values.shell.nodeSelector) }}
+      tolerations:
+        {{- include "drupal.tolerations" .Values.shell.nodeSelector | nindent 8 }}
+        {{- if .Values.shell.tolerations }}
+        {{- .Values.shell.tolerations | toYaml | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.shell.affinity }}
+      affinity:
+        {{- tpl ( .Values.shell.affinity | toYaml ) . | nindent 8 }}
+      {{- end }}
+{{- end }}

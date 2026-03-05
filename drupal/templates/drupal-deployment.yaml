@@ -31,10 +31,7 @@ spec:
         # Recreate pods when the configMap or secret changes.
         configMap-checksum: {{ include (print $.Template.BasePath "/drupal-configmap.yaml") . | sha256sum }}
         secrets-checksum: {{ include (print $.Template.BasePath "/drupal-secret.yaml") . | sha256sum }}
-        {{- if .Values.shell.enabled }}
-        shell-cm-checksum: {{ include (print $.Template.BasePath "/shell-configmap.yaml") . | sha256sum }}
-        shell-sec-checksum: {{ include (print $.Template.BasePath "/shell-secret.yaml") . | sha256sum }}
-        {{- end }}
+
     spec:
       enableServiceLinks: false
       initContainers:
@@ -158,54 +155,6 @@ spec:
           {{- .Values.nginx.resources | toYaml | nindent 10 }}
         {{- end }}
 
-      {{- if .Values.shell.enabled }}
-      # Shell sidecar container — shares all volume mounts with php-fpm for drush/CLI access.
-      - name: shell
-        image: {{ .Values.shell.image | quote }}
-        # Shell entrypoint configures SSH host keys and sshd — requires root.
-        securityContext:
-          runAsUser: 0
-        env:
-        {{- include "drupal.env" . | indent 8 }}
-        {{- if .Values.shell.gitAuth.keyserver.enabled }}
-        - name: GITAUTH_URL
-          value: {{ .Values.shell.gitAuth.keyserver.url | default (printf "https://keys.%s/api/1/git-ssh-keys" .Values.clusterDomain) | quote }}
-        - name: GITAUTH_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets-shell
-              key: keyserver.username
-        - name: GITAUTH_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets-shell
-              key: keyserver.password
-        - name: GITAUTH_SCOPE
-          value: {{ .Values.shell.gitAuth.repositoryUrl }}
-        - name: OUTSIDE_COLLABORATORS
-          value: {{ .Values.shell.gitAuth.outsideCollaborators | default true | quote }}
-        {{- end }}
-        ports:
-          - containerPort: 22
-        volumeMounts:
-        {{- include "drupal.volumeMounts" . | nindent 8 }}
-        - name: ssh-keys
-          mountPath: /etc/ssh/keys
-        - name: shell-configmap
-          mountPath: /etc/ssh/authorized_keys
-          subPath: authorizedKeys
-          readOnly: true
-        {{- if .Values.backup.enabled }}
-        - name: {{ .Release.Name }}-backup
-          mountPath: /backups
-          readOnly: true
-        {{- end }}
-        {{- if or $.Values.shell.resources .Values.php.resources }}
-        resources:
-          {{- merge .Values.shell.resources .Values.php.resources | toYaml | nindent 10 }}
-        {{- end }}
-      {{- end }}
-
       {{- if .Values.signalsciences.enabled }}
       # Signal Services container
       - name: sigsci
@@ -239,27 +188,6 @@ spec:
 
       volumes:
         {{- include "drupal.volumes" . | nindent 8}}
-        {{- if .Values.shell.enabled }}
-        - name: ssh-keys
-          persistentVolumeClaim:
-            {{- if and ( eq $.Values.shell.mount.storageClassName "silta-shared" ) ( eq ( include "silta-cluster.rclone.has-provisioner" $ ) "true" ) }}
-            claimName: {{ .Release.Name }}-ssh-keys2
-            {{- else }}
-            claimName: {{ .Release.Name }}-ssh-keys
-            {{- end }}
-        - name: shell-configmap
-          configMap:
-            name: {{ .Release.Name }}-shell
-        {{- if .Values.backup.enabled }}
-        - name: {{ .Release.Name }}-backup
-          persistentVolumeClaim:
-            {{- if and ( eq $.Values.backup.storageClassName "silta-shared" ) ( eq ( include "silta-cluster.rclone.has-provisioner" $ ) "true" ) }}
-            claimName: {{ .Release.Name }}-backup2
-            {{- else }}
-            claimName: {{ .Release.Name }}-backup
-            {{- end }}
-        {{- end }}
-        {{- end }}
         {{- if .Values.nginx.basicauth.enabled }}
         - name: nginx-basicauth
           secret:
