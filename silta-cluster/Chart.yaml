@@ -54,5 +54,5 @@ dependencies:
   condition: nfs-subdir-external-provisioner.enabled
 - name: docker-registry
   repository: https://twuni.github.io/docker-registry.helm
-  version: 2.1.x
+  version: 2.3.x
   condition: docker-registry.enabled
