@@ -400,7 +400,7 @@ docker-registry:
   enabled: false
   image:
     repository: distribution/distribution  
-    tag: 2.8.1
+    tag: 2.8.3
   service:
     port: 80
   persistence:
