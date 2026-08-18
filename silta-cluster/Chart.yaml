@@ -37,7 +37,7 @@ dependencies:
   # repository: file://../csi-rclone
   condition: csi-rclone.enabled
 - name: cert-manager
-  version: 0.10.x
+  version: 0.16.x
   repository: https://charts.jetstack.io/
   condition: cert-manager.enabled
 - name: silta-proxy
