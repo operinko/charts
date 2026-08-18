@@ -42,7 +42,7 @@ gcsgateway:
 helmKubectlJqImage:
   pullPolicy: IfNotPresent
   repository: bskim45/helm-kubectl-jq
-  tag: 3.1.0
+  tag: 3.3.4
 image:
   pullPolicy: IfNotPresent
   repository: minio/minio
